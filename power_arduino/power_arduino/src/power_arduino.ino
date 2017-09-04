@@ -255,7 +255,7 @@ void power_setup(){
 }
 
 
-void sendInfo(char* sensor, float value) {
+void sendInfo(const char* sensor, float value) {
   char buffer[128];
   unsigned long tiempo=0;
   tiempo=tiempo1970();
