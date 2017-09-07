@@ -41,6 +41,8 @@ class medidor {	//Definición de la clase.
 	public:
 		medidor();	//Constructor.
 		void update();
+		void print();
+		void print_eeprom();
 
 		char          IdDispositivo[MEDIDOR_ID_LEN]; //[64]
 		char          WiFi[MEDIDOR_WIFI_LEN]; //[32]
