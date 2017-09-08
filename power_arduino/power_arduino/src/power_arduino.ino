@@ -15,6 +15,7 @@
 #include <ESP8266WebServer.h>
 #include "ArduinoJson.h"
 
+#define green 15
 #define rele 12
 #define boton 0
 
@@ -138,7 +139,7 @@ static int pulsador_out (fsmpp* _this){
 static int client_connect (fsmpp* _this){
   return (WiFi.softAPgetStationNum() == 1) ? 1 : 0;};
 
-static int client_disconect (fsmpp* _this){
+static int client_disconnect (fsmpp* _this){
   return (WiFi.softAPgetStationNum() == 0) ? 1 : 0;};
 
 static int check_true (fsmpp* _this){
@@ -220,6 +221,14 @@ static void set_up (fsmpp* _this){ //Se puede poner también para connected
   Udp.begin(PuertoLocal);
 };
 
+static void reset_wifi (fsmpp* _this){ //Se puede poner también para connected
+  struct mifsm_user_t* user = (struct mifsm_user_t*)_this->userInfo;
+  user->time_retry = 0;
+  WiFi.disconnect(false);
+
+  mimedidor.update();
+};
+
 static void mensaje (fsmpp* _this){ //Se puede poner también para connected
   Serial.println("esperando");
 };
@@ -244,10 +253,10 @@ fsmpp_trans_t trans[] = {
   { MEASURE,      pulsador_timeout,  CONFIG_WAIT,  access_point },
   { CONFIG_WAIT,  client_connect,    CONFIG,       mensaje},
   //{ CONFIG,       data,              CONFIG,       process_data },
-  { CONFIG,       client_disconect,  MEASURE,      set_up },
-  { CONFIG,       check_true,        CONFIG,       ws_loop },
+  { CONFIG,       client_disconnect, IDLE,         reset_wifi },
   { CONFIG,       pulsador,          CONFIG,       time_annotate },
   { CONFIG,       pulsador_out,      IDLE,         time_reset },
+  { CONFIG,       check_true,        CONFIG,       ws_loop },
   {-1, NULL, -1, NULL },
 };
 /*******************************************************************/
